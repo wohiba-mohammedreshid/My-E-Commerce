@@ -1,0 +1,17 @@
+{
+  "name": "shopwave-pwa",
+  "version": "1.0.0",
+  "description": "Beginner-friendly e-commerce Progressive Web App",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build": "cd client && npm run build",
+    "seed": "cd server && npm run seed"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
