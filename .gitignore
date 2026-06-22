@@ -8,4 +8,3 @@ build/
 serviceAccountKey.json
 firebase-debug.log
 firebase-service-account.json
-README.md
