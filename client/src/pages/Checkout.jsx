@@ -86,6 +86,7 @@ export default function Checkout() {
   const [step, setStep] = useState(1); // 1 = shipping, 2 = payment
   const [stripePromise, setStripePromise] = useState(null);
   const [clientSecret, setClientSecret] = useState('');
+  const [error, setError] = useState('');
   const [shippingData, setShippingData] = useState({
     fullName: '',
     address: '',
@@ -103,18 +104,24 @@ export default function Checkout() {
 
   useEffect(() => {
     async function initPayment() {
-      const config = await paymentApi.getConfig();
-      if (config.publishableKey) {
-        setStripePromise(loadStripe(config.publishableKey));
+      try {
+        const config = await paymentApi.getConfig();
+        if (config.publishableKey) {
+          setStripePromise(loadStripe(config.publishableKey));
+        }
+        const intent = await paymentApi.createIntent(total);
+        setClientSecret(intent.clientSecret);
+      } catch (error) {
+        console.error('Payment initialization failed:', error);
+        setError(error.message || 'Failed to initialize payment. Please try again.');
       }
-      const intent = await paymentApi.createIntent(total);
-      setClientSecret(intent.clientSecret);
     }
     if (step === 2) initPayment();
   }, [step, total]);
 
   function handleShippingSubmit(e) {
     e.preventDefault();
+    setError('');
     setStep(2);
   }
 
@@ -204,14 +211,12 @@ export default function Checkout() {
                   ← Back to Shipping
                 </button>
 
+                {error && <div className="alert alert-error">{error}</div>}
+
                 {clientSecret && (
-                  stripePromise ? (
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
-                      <PaymentForm shipping={shippingData} onSuccess={handleOrderSuccess} />
-                    </Elements>
-                  ) : (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
                     <PaymentForm shipping={shippingData} onSuccess={handleOrderSuccess} />
-                  )
+                  </Elements>
                 )}
               </div>
             )}
